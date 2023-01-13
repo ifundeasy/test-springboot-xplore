@@ -1,0 +1,46 @@
+spring:
+  cloud:
+    schema-registry-client:
+      endpoint: http://${SCHEMA_REGISTRY_HOST:localhost}:${SCHEMA_REGISTRY_PORT:8081}
+    schema:
+      avro:
+        schema-locations:
+          - classpath:avro/news-event.avsc
+    stream:
+      kafka:
+        binder:
+          brokers: ${KAFKA_HOST:localhost}:${KAFKA_PORT:29092}
+          auto-add-partitions: true
+      bindings:
+        news-out-0:
+          destination: com.xplore.newspipeline.producer.news
+          content-type: application/*+avro
+          producer:
+            partition-key-expression: headers['partitionKey']
+            partition-count: 2
+  sleuth:
+    sampler:
+      probability: 1.0
+  main:
+    allow-bean-definition-overriding: true
+
+management:
+  endpoints:
+    web:
+      exposure.include: beans, env, health, info, metrics, mappings
+  endpoint:
+    health:
+      show-details: always
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://${EUREKA_HOST:localhost}:${EUREKA_PORT:8761}/eureka
+  instance:
+    preferIpAddress: true
+
+springdoc:
+  show-actuator: true
+  swagger-ui:
+    groups-order: DESC
+    disable-swagger-default-url: true
